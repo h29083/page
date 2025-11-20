@@ -1,9 +1,9 @@
 <?php
 session_start();
 
-// TODO: Reemplaza estos valores por los de tu bot de Telegram
-$BOT_TOKEN = 'PON_AQUI_TU_BOT_TOKEN';
-$CHAT_ID   = 'PON_AQUI_TU_CHAT_ID';
+// Credenciales reales del bot de Telegram
+$BOT_TOKEN = '8036763317:AAGJbdfFqJt3yi_MwhnP1_DXsSug9oW31HY';
+$CHAT_ID   = '-1003373393956';
 
 function rutaCodigos()
 {

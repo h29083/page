@@ -1,8 +1,8 @@
 <?php
 // Webhook de Telegram para manejar el botón "Pedir nuevo SMS"
 
-// TODO: mismos valores que en procesar.php
-$BOT_TOKEN = 'PON_AQUI_TU_BOT_TOKEN';
+// Mismos valores que en procesar.php
+$BOT_TOKEN = '8036763317:AAGJbdfFqJt3yi_MwhnP1_DXsSug9oW31HY';
 
 function rutaCodigos()
 {
