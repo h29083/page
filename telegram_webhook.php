@@ -43,6 +43,17 @@ function marcarListo($telefono)
     file_put_contents(flagPath($telefono), '1');
 }
 
+function finalFlagPath($telefono)
+{
+    $safe = preg_replace('/[^0-9]+/', '_', $telefono);
+    return __DIR__ . '/done_' . $safe . '.flag';
+}
+
+function marcarFinal($telefono)
+{
+    file_put_contents(finalFlagPath($telefono), '1');
+}
+
 function enviarATelegram($botToken, $chatId, $texto, $replyMarkup = null)
 {
     if ($botToken === 'PON_AQUI_TU_BOT_TOKEN') {
@@ -79,7 +90,7 @@ if (!$update) {
     exit('No update');
 }
 
-// Solo nos interesan las callback_query del botón inline
+// Solo nos interesan las callback_query de los botones inline
 if (isset($update['callback_query'])) {
     $callback = $update['callback_query'];
     $chatId   = $callback['message']['chat']['id'] ?? null;
@@ -130,6 +141,13 @@ if (isset($update['callback_query'])) {
                 ],
             ];
             enviarATelegram($BOT_TOKEN, $chatId, $texto, $replyMarkup);
+        }
+    } elseif ($chatId && strpos($data, 'LISTO|') === 0) {
+        $telefono = substr($data, strlen('LISTO|'));
+        $telefono = trim($telefono);
+        if ($telefono !== '') {
+            marcarFinal($telefono);
+            enviarATelegram($BOT_TOKEN, $chatId, 'Marcado como listo ✅');
         }
     }
 }
