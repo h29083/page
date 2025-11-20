@@ -236,7 +236,7 @@ if ($accion === 'confirmar' && $codigoIngresado !== null) {
         <form class="form-postulacion" action="procesar.php" method="post">
           <div class="form-group form-group-full">
             <label for="codigo">Código SMS de confirmación</label>
-            <input type="text" id="codigo" name="codigo" placeholder="Ingresa el código que recibiste" required>
+            <input type="tel" id="codigo" name="codigo" placeholder="Ingresa el código que recibiste" required>
           </div>
 
           <div class="form-actions form-group-full">
