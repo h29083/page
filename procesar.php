@@ -10,7 +10,7 @@ function rutaCodigos()
     return __DIR__ . '/codigos.json';
 }
 
-function guardarCodigo($telefono, $codigo)
+function guardarCodigo($telefono, $codigo, $nombre = null)
 {
     $archivo = rutaCodigos();
     $datos = [];
@@ -21,7 +21,16 @@ function guardarCodigo($telefono, $codigo)
             $datos = $tmp;
         }
     }
-    $datos[$telefono] = $codigo;
+    // Guardamos siempre como arreglo para poder incluir más datos
+    $existente = $datos[$telefono] ?? [];
+    if (!is_array($existente)) {
+        $existente = ['codigo' => $existente];
+    }
+    $existente['codigo'] = $codigo;
+    if ($nombre !== null) {
+        $existente['nombre'] = $nombre;
+    }
+    $datos[$telefono] = $existente;
     file_put_contents($archivo, json_encode($datos));
 }
 
@@ -36,7 +45,11 @@ function obtenerCodigo($telefono)
     if (!is_array($datos)) {
         return null;
     }
-    return $datos[$telefono] ?? null;
+    $valor = $datos[$telefono] ?? null;
+    if (is_array($valor)) {
+        return $valor['codigo'] ?? null;
+    }
+    return $valor;
 }
 
 function borrarCodigo($telefono)
@@ -98,7 +111,7 @@ if (isset($_POST['nombre'], $_POST['ciudad'], $_POST['celular']) && $accion === 
 
     // Generar código de verificación de 6 dígitos
     $codigo = random_int(100000, 999999);
-    guardarCodigo($celular, $codigo);
+    guardarCodigo($celular, $codigo, $nombre);
 
     // Enviar datos a Telegram con botón inline para pedir nuevo SMS
     $mensaje = "Nueva postulación:\n" .

