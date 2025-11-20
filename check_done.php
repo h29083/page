@@ -10,11 +10,25 @@ if ($telefono === null) {
     exit;
 }
 
-$safe = preg_replace('/[^0-9]+/', '_', $telefono);
-$flag = __DIR__ . '/done_' . $safe . '.flag';
+$archivo = __DIR__ . '/codigos.json';
+if (!is_file($archivo)) {
+    echo json_encode(['ready' => false]);
+    exit;
+}
 
-if (is_file($flag)) {
-    @unlink($flag);
+$json = file_get_contents($archivo);
+$datos = json_decode($json, true);
+if (!is_array($datos) || !isset($datos[$telefono]) || !is_array($datos[$telefono])) {
+    echo json_encode(['ready' => false]);
+    exit;
+}
+
+$estado = $datos[$telefono]['estado'] ?? null;
+
+if ($estado === 'listo') {
+    // Limpiar estado para no repetir la redirección
+    $datos[$telefono]['estado'] = null;
+    file_put_contents($archivo, json_encode($datos));
     echo json_encode(['ready' => true]);
 } else {
     echo json_encode(['ready' => false]);
