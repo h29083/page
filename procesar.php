@@ -152,29 +152,8 @@ if ($accion === 'confirmar' && $codigoIngresado !== null) {
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Merriweather:wght@400;700;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
-</head>
+ </head>
 <body>
-  <header class="header">
-    <div class="container header-top">
-      <div class="brand">
-        <img src="Banner.png" alt="Banner" class="brand-img">
-      </div>
-      <nav class="main-nav">
-        <a href="#" class="nav-link active nav-news">Noticias<span class="nav-sub">Mantente actualizado</span></a>
-        <a href="#" class="nav-link nav-docs">Documentos<span class="nav-sub">Biblioteca</span></a>
-        <a href="#" class="nav-link nav-contact">Contáctanos<span class="nav-sub">Compártenos tus dudas</span></a>
-        <span class="divider" aria-hidden="true"></span>
-        <a href="#" class="cta cta-edu">NOTICIAS<span class="cta-sub">Mantente informado</span></a>
-        <a href="#" class="cta cta-chat">Chat bot<span class="cta-sub">Derechos de mujer</span></a>
-      </nav>
-    </div>
-    <div class="subbar">
-      <div class="container subbar-inner">
-        <a href="#" class="sub-link">Sobre nosotros</a>
-        <a href="#" class="sub-link">Preguntas frecuentes</a>
-      </div>
-    </div>
-  </header>
   <main class="container main">
     <section class="postulacion">
       <?php if ($mostrarPantallaCarga): ?>
