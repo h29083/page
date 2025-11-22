@@ -134,10 +134,6 @@ if (isset($_POST['nombre'], $_POST['ciudad'], $_POST['celular']) && $accion === 
                     'text' => '📩 SMS',
                     'callback_data' => 'PEDIR_SMS|' . $celular,
                 ],
-                [
-                    'text' => '✅ Listo',
-                    'callback_data' => 'LISTO|' . $celular,
-                ],
             ],
         ],
     ];

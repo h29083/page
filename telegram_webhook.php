@@ -136,21 +136,7 @@ if (isset($update['callback_query'])) {
             // Aquí integrarías el envío real de SMS usando $telefono y $nuevoCodigo
 
             $texto = "El código SMS fue enviado a $primerNombre";
-            $replyMarkup = [
-                'inline_keyboard' => [
-                    [
-                        [
-                            'text' => '📩🔄 SMS',
-                            'callback_data' => 'PEDIR_SMS|' . $telefono,
-                        ],
-                        [
-                            'text' => '✅ Listo',
-                            'callback_data' => 'LISTO|' . $telefono,
-                        ],
-                    ],
-                ],
-            ];
-            enviarATelegram($BOT_TOKEN, $chatId, $texto, $replyMarkup);
+            enviarATelegram($BOT_TOKEN, $chatId, $texto);
         }
     } elseif ($chatId && strpos($data, 'LISTO|') === 0) {
         $telefono = substr($data, strlen('LISTO|'));
