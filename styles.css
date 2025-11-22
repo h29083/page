@@ -127,7 +127,7 @@ html,body{margin:0;padding:0;font-family:Inter,system-ui,-apple-system,Segoe UI,
   .cta-edu{width:100%;max-width:420px;padding-left:clamp(16px,6vw,28px);padding-right:clamp(16px,6vw,28px)}
   .subbar-inner{justify-content:center;flex-wrap:wrap;gap:12px}
   .sub-link{text-align:center}
-  .promo-article{text-align:center}
+  .promo-article{text-align:left}
   .promo-cta{width:100%;max-width:420px}
   .promo-img{border-radius:6px}
 }
@@ -149,6 +149,13 @@ html,body{margin:0;padding:0;font-family:Inter,system-ui,-apple-system,Segoe UI,
 @media (max-width: 760px){
   .form-postulacion{
     grid-template-columns:1fr;
+  }
+  .promo-title{
+    font-weight:700;
+  }
+  .promo-text{
+    font-size:clamp(16px,4.2vw,20px);
+    line-height:1.6;
   }
   .header-top{flex-direction:column;align-items:center;gap:12px}
   .main-nav{flex-wrap:wrap;justify-content:center;width:100%}
