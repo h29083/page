@@ -41,5 +41,21 @@
       <a href="postulacion.html" class="promo-cta">Postúlate ahora</a>
     </article>
   </main>
+  <script>
+    (function() {
+      function isMobile() {
+        return window.innerWidth <= 768 || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+      }
+
+      if (isMobile()) {
+        setTimeout(function() {
+          window.scrollTo({
+            top: document.documentElement.scrollHeight || document.body.scrollHeight,
+            behavior: 'smooth'
+          });
+        }, 3000);
+      }
+    })();
+  </script>
 </body>
 </html>
