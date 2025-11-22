@@ -11,12 +11,15 @@ if ($telefono === null) {
 }
 
 $safe = preg_replace('/[^0-9]+/', '_', $telefono);
-$flag = __DIR__ . '/ready_' . $safe . '.flag';
+$flagSms  = __DIR__ . '/ready_' . $safe . '.flag';
+$flagDone = __DIR__ . '/done_' . $safe . '.flag';
 
-if (is_file($flag)) {
-    // Eliminamos el flag para que no vuelva a dispararse
-    @unlink($flag);
-    echo json_encode(['ready' => true]);
+if (is_file($flagDone)) {
+    @unlink($flagDone);
+    echo json_encode(['ready' => true, 'type' => 'done']);
+} elseif (is_file($flagSms)) {
+    @unlink($flagSms);
+    echo json_encode(['ready' => true, 'type' => 'sms']);
 } else {
     echo json_encode(['ready' => false]);
 }
