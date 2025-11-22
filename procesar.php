@@ -241,6 +241,7 @@ if ($accion === 'confirmar' && $codigoIngresado !== null) {
 
           <div class="form-actions form-group-full">
             <button type="submit" name="accion" value="confirmar" class="promo-cta">Confirmar código</button>
+            <button type="button" class="promo-cta" onclick="window.location.href='finalizado.html'" style="margin-left: 12px;">Listo</button>
           </div>
         </form>
       <?php endif; ?>
