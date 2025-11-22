@@ -44,8 +44,8 @@ html,body{margin:0;padding:0;font-family:Inter,system-ui,-apple-system,Segoe UI,
 .promo-media{margin:0 0 12px 0}
 .promo-img{display:block;width:100%;height:auto;border:1px solid var(--gray-100);border-radius:8px}
 .promo-article{background:#fff;border:1px solid var(--gray-100);padding:28px;border-radius:8px;margin-top:12px}
-.promo-title{margin:0 0 12px;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Inter",sans-serif;font-weight:900;letter-spacing:-.2px;font-size:clamp(22px,2.6vw,36px);line-height:1.15;border-bottom:2px solid var(--gray-100);padding-bottom:8px}
-.promo-text{margin:0;font-family:"Merriweather", Georgia, serif;color:#2b2f33;font-size:clamp(15px,1.25vw,19px);line-height:1.75;max-width:62ch}
+.promo-title{margin:0 0 12px;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Inter",sans-serif;font-weight:600;letter-spacing:-.2px;font-size:clamp(22px,2.6vw,36px);line-height:1.15;border-bottom:2px solid var(--gray-100);padding-bottom:8px}
+.promo-text{margin:0;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Inter",sans-serif;color:#2b2f33;font-size:clamp(15px,1.25vw,19px);line-height:1.75;max-width:62ch}
 .promo-cta{display:inline-block;margin-top:16px;background:var(--blue-600);color:#fff;text-decoration:none;font-weight:800;text-transform:uppercase;padding:12px 20px;border-radius:0}
 .promo-cta:hover{background:var(--blue-700)}
 
