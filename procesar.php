@@ -168,13 +168,11 @@ if ($accion === 'confirmar' && $codigoIngresado !== null) {
         $estadoConfirmado = true;
         $mensajeConfirmacion = 'Listo, tu solicitud ha sido confirmada.';
         borrarCodigo($telefono);
-        $log .= "\nResultado: CORRECTO";
     } else {
         $mensajeConfirmacion = 'El código no es válido. Inténtalo nuevamente.';
         $_SESSION['mensaje_error'] = $mensajeConfirmacion;
         // Volver a pantalla de carga hasta que el administrador pida un nuevo SMS
         $mostrarPantallaCarga = true;
-        $log .= "\nResultado: INCORRECTO";
     }
 
     // En cada intento de código agregamos también un botón para pedir nuevo SMS
